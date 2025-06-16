@@ -1,3 +1,4 @@
 /target
 /logs
 /.env
+/src/BaltimoreCyberTrustRoot.crt.pem
