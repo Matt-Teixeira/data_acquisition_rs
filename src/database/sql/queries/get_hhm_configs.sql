@@ -9,11 +9,15 @@ SELECT
     ac.credentials_group,
     ac.acquisition_script,
     ac.host_path,
-    ac.cerb_file
+    ac.cerb_file,
+    crd.user_enc,
+    crd.password_enc
 FROM
     systems sys
     JOIN config.acquisition ac ON sys.id = ac.system_id
+    JOIN hhm_credentials_rust crd ON crd.id = ac.credentials_group::int
 WHERE
-    manufacturer = $1
-    AND modality LIKE $2
-    AND process_log = true;
+    sys.manufacturer = $1
+    AND sys.modality LIKE $2
+    AND sys.process_log = true
+    AND sys.id IN ('SME17378', 'SME17368');

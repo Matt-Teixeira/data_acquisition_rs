@@ -1,10 +1,13 @@
+use crate::{
+    database::models::systems_model::Systems,
+    util::decrypt::{self, decrypt},
+};
 use deadpool_postgres::Pool;
 use serde::Serialize;
 use serde_json::json;
 use std::net::IpAddr;
 use tokio_postgres::Row;
-use tracing::info;
-use crate::database::models::systems_model::Systems;
+use tracing::{error, info};
 
 #[derive(Debug, Serialize)]
 pub struct GeSystems {
@@ -18,9 +21,13 @@ pub struct GeSystems {
     pub credentials_group: Option<String>,
     pub acquisition_script: Option<String>,
     pub host_path: Option<String>,
-    pub cerb_file: Option<String>,
+    pub user_enc: Option<String>,
+    pub password_enc: Option<String>,
+    pub user: String,
+    pub password: String,
 }
 
+// GET DB CONFIG DATA
 impl GeSystems {
     pub fn from_row(row: Row) -> Self {
         Self {
@@ -34,11 +41,14 @@ impl GeSystems {
             credentials_group: row.get("credentials_group"),
             acquisition_script: row.get("acquisition_script"),
             host_path: row.get("host_path"),
-            cerb_file: row.get("cerb_file"),
+            user_enc: row.get("user_enc"),
+            password_enc: row.get("password_enc"),
+            user: String::new(),
+            password: String::new(),
         }
     }
 
-    pub async fn get_data(
+    pub async fn get_db_config(
         pool: &Pool,
         run_id: &str,
         boot_args: Vec<String>,
@@ -60,11 +70,47 @@ impl GeSystems {
         let systems: Vec<Systems> = rows
             .into_iter()
             .map(|row| {
-                let ge = GeSystems::from_row(row);
+                let mut ge = GeSystems::from_row(row);
+                match ge.decrypt_creds() {
+                    Ok((user, pass)) => {
+                        ge.user = user;
+                        ge.password = pass;
+
+                        let note = json!({
+                            "system_id": &ge.id,
+                            "message": "Credentials Decrypted"
+                        });
+                        info!(run_id = run_id, note = %note);
+                    }
+                    Err(e) => {
+                        error!(run_id = run_id, error = ?e);
+                    }
+                }
                 Systems::Ge(ge)
             })
             .collect();
 
         Ok(systems)
+    }
+}
+
+// TODO: BRING THIS LOGIC INTO WHERE THE DB COME IN
+impl GeSystems {
+    pub fn decrypt_creds(&self) -> Result<(String, String), Box<dyn std::error::Error>> {
+        let sme = &self.id;
+        match sme {
+            Some(data) => println!("SME: {}", data),
+            None => println!("No SME Data"),
+        }
+
+        // .as_ref() Converts from Option<String> to Option<&String> — avoids moving the String
+        // .ok_or("Error Message") Converts the Option into a Result where None becomes an Err()
+        let user_enc = self.user_enc.as_ref().ok_or("Missind user cred")?;
+        let user = decrypt(user_enc)?;
+
+        let pass_enc = self.password_enc.as_ref().ok_or("Missind password cred")?;
+        let password = decrypt(pass_enc)?;
+
+        Ok((user, password))
     }
 }

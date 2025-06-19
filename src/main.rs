@@ -1,5 +1,6 @@
 mod boot;
 mod database;
+mod jobs;
 mod util;
 use dotenv::dotenv;
 use serde_json::json;
@@ -76,7 +77,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 arg_2 = boot_args[2],
                 app_name,
                 func,
-                tag
+                tag,
+                error = ?e
             );
             println!("{}", e)
         }

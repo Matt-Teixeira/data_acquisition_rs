@@ -1,17 +1,17 @@
-use crate::database;
-use crate::database::models::systems_model::Systems;
+use crate::jobs;
+use crate::{database, database::models::systems_model::Systems};
 use tracing::{error, info};
 
 #[derive(Debug)]
-struct AppRunConfig {
-    system_manufacturer: String,
-    system_modality: String,
+pub struct AppRunConfig {
+    pub system_manufacturer: String,
+    pub system_modality: String,
 }
 
 #[derive(Debug)]
-struct AppRunState {
-    config: AppRunConfig,
-    systems: Vec<Systems>,
+pub struct AppRunState {
+    pub config: AppRunConfig,
+    pub systems: Vec<Systems>,
 }
 
 impl AppRunState {
@@ -36,17 +36,8 @@ pub async fn on_boot(
     let app = AppRunState::new(run_id, boot_args).await;
 
     match app {
-        Ok(data) => {
-            for system in data.systems {
-                match system {
-                    Systems::Ge(ge) => {
-                        println!("\n{:?}", ge);
-                    }
-                    Systems::Philips(philips) => {
-                        println!("\n{:?}", philips);
-                    }
-                }
-            }
+        Ok(job_configs) => {
+            jobs::run_job::determine_manufacturer(run_id, job_configs).await?;
             return Ok(true);
         }
         Err(e) => {

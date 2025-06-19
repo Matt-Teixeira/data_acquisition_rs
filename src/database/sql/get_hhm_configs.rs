@@ -17,7 +17,7 @@ pub async fn get_system_configs(
     // LOG: END
 
     match boot_args[1].as_str() {
-        "GE" => GeSystems::get_data(pool, run_id, boot_args).await,
+        "GE" => GeSystems::get_db_config(pool, run_id, boot_args).await,
         "Philips" => PhilipsSystems::get_data(pool, run_id, boot_args).await,
         _ => Ok(vec![]),
     }
