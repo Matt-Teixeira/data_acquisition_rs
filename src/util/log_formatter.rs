@@ -7,7 +7,7 @@ pub async fn format_log(log_name: String, log_path: String) -> Result<(), Box<dy
     let dir_name = Local::now().format("%Y-%m-%d").to_string();
     let args: Vec<&String> = vec![&log_path, &log_name, &dir_name];
 
-    println!("jq -s . {} > ./logs/{}/{}", &log_path, &log_name, &dir_name);
+    // println!("jq -s . {} > ./logs/{}/{}", &log_path, &log_name, &dir_name);
 
     let output = Command::new(script_path)
         .args(&args)
@@ -19,8 +19,8 @@ pub async fn format_log(log_name: String, log_path: String) -> Result<(), Box<dy
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
 
-    println!("STDOUT: {}", stdout);
-    println!("STDERR: {}", stderr);
+    // println!("LOG FORMATTER STDOUT: {}", stdout);
+    // println!("LOG FORMATTER STDERR: {}", stderr);
 
     Ok(())
 }
