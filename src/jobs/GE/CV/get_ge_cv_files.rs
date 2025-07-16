@@ -10,12 +10,12 @@ use tokio::process::Command;
 use tracing::{error, info};
 use uuid::Uuid;
 
-pub async fn get_ge_ct(
+pub async fn get_ge_cv(
     run_id: &str,
     sys_configs: Vec<Systems>,
     start_datetime: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let func = "get_ge_ct";
+    let func = "get_ge_cv";
     info!(run_id = run_id, func, tag = "CALL");
 
     let jobs: Vec<_> = sys_configs
@@ -56,7 +56,7 @@ async fn job(
         .as_ref()
         .ok_or("no bash script")?;
     let script_path = format!(
-        "/home/matt-teixeira/education/rust/rust-azure/src/read/GE/CT/{}",
+        "/home/matt-teixeira/education/rust/rust-azure/src/read/GE/CV/{}",
         bash_script
     );
 
@@ -92,8 +92,8 @@ async fn job(
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
 
-    // CHECK STDOUT/STDERR AND DO WORK IF CONNECTION ERRORS
-
+    // START: CHECK STDOUT/STDERR AND DO WORK IF CONNECTION ERRORS
+ge_system.tunnel_reset = true;
     // UNSUCCESSFULL CONNECTION ATTEMPT
     if !output.status.success() {
         // RESET THIS SYSTEM'S TUNNEL - PUSH TO ip:queue
@@ -137,7 +137,7 @@ async fn job(
             String::from(start_datetime),
             false,
             String::from("hhm"),
-            false,
+            true,
             connection_error,
         );
 
@@ -168,26 +168,4 @@ Some(async move {
 
 1) async { ... } creates a future.
 2) move tells Rust: move all captured variables into the future's scope.
-
-
-
-
-
-let reset_host_tunnel = system_structs::SYSTEM_RESET::new(
-                ge_system.id.as_ref().ok_or("no system id")?,
-                ge_system.manufacturer.as_ref().ok_or("no system id")?,
-                ge_system.modality.as_ref().ok_or("no system id")?,
-                ge_system.host_ip.as_ref().ok_or("no system id")?,
-                ge_system
-                    .debian_server_path
-                    .as_ref()
-                    .ok_or("no system id")?,
-                ge_system.credentials_group.as_ref().ok_or("no system id")?,
-                ge_system
-                    .acquisition_script
-                    .as_ref()
-                    .ok_or("no system id")?,
-                ge_system.data_source.as_ref().ok_or("no system id")?,
-                ge_system.tunnel_reset.as_ref().ok_or("no system id")?,
-            );
 */

@@ -16,13 +16,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let boot_args: Vec<String> = env::args().collect();
 
     // LOG: START
-    let (run_id, _start_datetime, log_name, log_path, file) = util::log_setup::log_setup()?;
+    let (run_id, start_datetime, log_name, log_path, file) = util::log_setup::log_setup()?;
     let app_name = env::var("APP_NAME")?;
     let func = "main";
     let tag = "CALL";
-
-    println!("{}", log_name);
-    println!("{}", log_path);
 
     // INIT LOG SETUP
     let (non_blocking, _guard) = non_blocking(file);
@@ -56,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // LOG: END
 
     // RUN JOBS: START
-    let successful_run = boot::on_boot::on_boot(&run_id, boot_args.clone()).await;
+    let successful_run = boot::on_boot::on_boot(&run_id, boot_args.clone(), start_datetime).await;
     // RUN JOBS: END
 
     match successful_run {

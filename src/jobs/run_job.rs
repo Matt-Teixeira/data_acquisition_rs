@@ -17,7 +17,7 @@ pub async fn determine_manufacturer(
         %note
     );
 
-    if job_configs.config.system_manufacturer == "GE".to_string() {
+    if job_configs.config.system_manufacturer == "GE" {
         GE::ge_modalities::determine_ge_modality(run_id, job_configs).await?;
     }
 

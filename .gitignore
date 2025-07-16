@@ -3,3 +3,4 @@
 /.env
 /src/BaltimoreCyberTrustRoot.crt.pem
 /files
+/redis_ex.js

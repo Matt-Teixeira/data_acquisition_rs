@@ -3,13 +3,13 @@ use crate::{
     util::decrypt::{self, decrypt},
 };
 use deadpool_postgres::Pool;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::net::IpAddr;
 use tokio_postgres::Row;
 use tracing::{error, info};
 
-#[derive(Debug, Serialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GeSystems {
     pub id: Option<String>,
     pub manufacturer: Option<String>,
@@ -25,6 +25,7 @@ pub struct GeSystems {
     pub password_enc: Option<String>,
     pub user: String,
     pub password: String,
+    pub tunnel_reset: bool,
 }
 
 // GET DB CONFIG DATA
@@ -45,6 +46,7 @@ impl GeSystems {
             password_enc: row.get("password_enc"),
             user: String::new(),
             password: String::new(),
+            tunnel_reset: false,
         }
     }
 
@@ -103,8 +105,8 @@ impl GeSystems {
             None => println!("No SME Data"),
         }
 
-        // .as_ref() Converts from Option<String> to Option<&String> — avoids moving the String
-        // .ok_or("Error Message") Converts the Option into a Result where None becomes an Err()
+        // .as_ref() Converts from Option<String> to Option<&String> — Avoids moving the String
+        // .ok_or("Error Message") — Converts the Option into a Result where None becomes an Err()
         let user_enc = self.user_enc.as_ref().ok_or("Missind user cred")?;
         let user = decrypt(user_enc)?;
 

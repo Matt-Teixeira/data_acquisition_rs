@@ -1,12 +1,12 @@
+use crate::database::models::systems_model::Systems;
 use deadpool_postgres::Pool;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::net::IpAddr;
 use tokio_postgres::Row;
 use tracing::info;
-use crate::database::models::systems_model::Systems;
 
-#[derive(Debug, Serialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PhilipsSystems {
     pub id: Option<String>,
     pub manufacturer: Option<String>,

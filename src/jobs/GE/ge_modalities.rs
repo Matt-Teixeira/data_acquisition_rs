@@ -1,4 +1,7 @@
-use crate::{boot::on_boot::AppRunState, jobs::GE::CT};
+use crate::{
+    boot::on_boot::AppRunState,
+    jobs::GE::{CT, CV},
+};
 use serde_json::json;
 use tracing::info;
 
@@ -16,7 +19,24 @@ pub async fn determine_ge_modality(
         tag = "CALL",
         %note
     );
-    CT::get_ge_ct_files::get_ge_ct(run_id, job_configs.systems).await?;
+
+    if job_configs.config.system_modality == "CT" {
+        CT::get_ge_ct_files::get_ge_ct(
+            run_id,
+            job_configs.systems.clone(),
+            job_configs.config.start_datetime.clone(),
+        )
+        .await?;
+    }
+
+    if job_configs.config.system_modality == "CV/IR" {
+        CV::get_ge_cv_files::get_ge_cv(
+            run_id,
+            job_configs.systems,
+            job_configs.config.start_datetime,
+        )
+        .await?;
+    }
 
     Ok(())
 }
