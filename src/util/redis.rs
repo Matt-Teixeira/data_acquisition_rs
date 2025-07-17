@@ -1,3 +1,4 @@
+use crate::database::models::{ge_model::GeSystems, systems_model::Systems};
 use crate::util::system_structs::{System, SYSTEM_ONLINE};
 use redis::AsyncCommands;
 use serde_json::json;
@@ -16,9 +17,7 @@ pub async fn get_redis_kvp(key: &str) -> Result<Option<String>, Box<dyn std::err
     Ok(val)
 }
 
-pub async fn rpush_redis_queue(
-    set_value: System,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn rpush_redis_queue(set_value: System) -> Result<(), Box<dyn std::error::Error>> {
     // SET UP REDIS CONNECTION
     let ip_adder = env::var("DEV_REDIS")?;
     let redis_url = format!("redis://{}/", ip_adder);
@@ -45,4 +44,21 @@ pub async fn rpush_redis_queue(
     }
 }
 
-// let online_queue: Vec<String> = con.lrange("online:queue", 0, -1).await?;
+pub async fn get_ip_queue() -> Result<Vec<Systems>, Box<dyn std::error::Error>> {
+    // SET UP REDIS CONNECTION
+    let ip_adder = env::var("DEV_REDIS")?;
+    let redis_url = format!("redis://{}/", ip_adder);
+    let client = redis::Client::open(redis_url)?;
+    let mut con = client.get_async_connection().await?;
+
+    let items: Vec<String> = con.lrange("rust-ip:queue", 0, -1).await?;
+
+    // DESERIALIZE EACH ITEM BACK INTO THE System ENUM
+    let mut systems: Vec<Systems> = Vec::new();
+    for item in items {
+        let system: Systems = serde_json::from_str(&item)?;
+        systems.push(system);
+    }
+
+    Ok(systems)
+}
