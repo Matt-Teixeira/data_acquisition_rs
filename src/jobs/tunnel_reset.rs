@@ -1,7 +1,4 @@
-use crate::boot::on_boot::AppRunState;
-use crate::database::models::{
-    ge_model::GeSystems, philips_model::PhilipsSystems, systems_model::Systems,
-};
+use crate::database::models::systems_model::Systems;
 use crate::jobs::GE::{CT, CV};
 use crate::util::redis::get_ip_queue;
 
@@ -9,7 +6,6 @@ pub async fn reset_tunnels(
     run_id: &str,
     start_datetime: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    println!("\nHELLO TUNNEL RESETS!!!\n");
     let systems: Vec<Systems> = get_ip_queue().await?;
 
     /*
