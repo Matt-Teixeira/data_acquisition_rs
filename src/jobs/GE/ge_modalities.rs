@@ -23,17 +23,15 @@ pub async fn determine_ge_modality(
     if job_configs.config.system_modality == "CT" {
         CT::get_ge_ct_files::get_ge_ct(
             run_id,
-            job_configs.systems.clone(),
-            job_configs.config.start_datetime.clone(),
+            job_configs.systems,
+            &job_configs.config.start_datetime,
         )
         .await?;
-    }
-
-    if job_configs.config.system_modality == "CV/IR" {
+    } else if job_configs.config.system_modality == "CV/IR" {
         CV::get_ge_cv_files::get_ge_cv(
             run_id,
             job_configs.systems,
-            job_configs.config.start_datetime,
+            &job_configs.config.start_datetime,
         )
         .await?;
     }

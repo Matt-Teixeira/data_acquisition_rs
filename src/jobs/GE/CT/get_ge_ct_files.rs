@@ -13,7 +13,7 @@ use uuid::Uuid;
 pub async fn get_ge_ct(
     run_id: &str,
     sys_configs: Vec<Systems>,
-    start_datetime: String,
+    start_datetime: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let func = "get_ge_ct";
     info!(run_id = run_id, func, tag = "CALL");
