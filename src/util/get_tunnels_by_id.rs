@@ -1,12 +1,16 @@
-use std::collections::HashSet;
 use crate::database;
 use crate::util::system_structs::TunnelData;
+use serde_json::json;
+use std::collections::HashSet;
 use std::net::IpAddr;
+use tracing::{error, info};
 
 pub async fn get_tunnels_by_id(
     run_id: &str,
     ip_list: Vec<&IpAddr>,
 ) -> Result<Vec<TunnelData>, Box<dyn std::error::Error>> {
+    let func: &str = "get_tunnels_by_id";
+    info!(run_id, func, tag = "CALL");
     static GET_TUNNEL_DATA: &str = include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/src/database/sql/queries/get_tunnels_by_ip.sql"
@@ -19,7 +23,7 @@ pub async fn get_tunnels_by_id(
 
     let rows = client.query(&stmt, &[&ip_list]).await?;
 
-    let mut tunnels: Vec<TunnelData> = rows
+    let tunnels: Vec<TunnelData> = rows
         .into_iter()
         .map(|row| {
             let g = TunnelData::from_row(row);
@@ -27,21 +31,15 @@ pub async fn get_tunnels_by_id(
         })
         .collect();
 
-    // START: TEST SETUP
-    let ip_str = "10.146.16.47";
-    let ip: IpAddr = ip_str.parse()?;
-    let dup_ip: TunnelData = TunnelData::new(Some(ip), Some(32), Some(68), Some(924));
-
-    tunnels.push(dup_ip);
-
-    // END: TEST SETUP
-
-    let unique_tunnels: Vec<TunnelData> = dedupe_tunnels(tunnels);
+    let unique_tunnels: Vec<TunnelData> = dedupe_tunnels(run_id, tunnels);
 
     Ok(unique_tunnels)
 }
 
-fn dedupe_tunnels(tunnels: Vec<TunnelData>) -> Vec<TunnelData> {
+fn dedupe_tunnels(run_id: &str, tunnels: Vec<TunnelData>) -> Vec<TunnelData> {
+    let func: &str = "dedupe_tunnels";
+    info!(run_id, func, tag = "CALL");
+
     let mut unique = HashSet::new();
     let mut unique_tunnels: Vec<TunnelData> = Vec::new();
 

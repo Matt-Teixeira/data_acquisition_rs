@@ -39,7 +39,7 @@ impl SYSTEM_ONLINE {
     }
 }
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct TunnelData {
     pub remote_subnet_ip: Option<IpAddr>,
     pub remote_subnet_mask: Option<i32>,

@@ -93,7 +93,6 @@ async fn job(
     let stderr = String::from_utf8_lossy(&output.stderr);
 
     // START: CHECK STDOUT/STDERR AND DO WORK IF CONNECTION ERRORS
-ge_system.tunnel_reset = true;
     // UNSUCCESSFULL CONNECTION ATTEMPT
     if !output.status.success() {
         // RESET THIS SYSTEM'S TUNNEL - PUSH TO ip:queue
@@ -114,9 +113,6 @@ ge_system.tunnel_reset = true;
 
             redis::rpush_redis_queue(System::Online(system_to_queue)).await?;
         }
-
-        eprintln!("\nScript failed: {}", stderr);
-
         let note = json!({
             "system_id": &system_id,
             "host_ip": &host_ip,

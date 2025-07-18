@@ -35,21 +35,6 @@ impl AppRunState {
 
         Ok(AppRunState { config, systems })
     }
-
-    pub async fn tunnel_reset(
-        run_id: &str,
-        manu: String,
-        modality: String,
-        start_datetime: String,
-        systems: Vec<Systems>,
-    ) -> Result<Self, Box<dyn std::error::Error>> {
-        let config = AppRunConfig {
-            system_manufacturer: manu,
-            system_modality: modality,
-            start_datetime,
-        };
-        Ok(AppRunState { config, systems })
-    }
 }
 
 pub async fn on_boot(
@@ -58,7 +43,7 @@ pub async fn on_boot(
     start_datetime: String,
 ) -> Result<bool, Box<dyn std::error::Error>> {
     if boot_args[1] == "ip_reset" {
-        let test_d = jobs::tunnel_reset::reset_tunnels(run_id, start_datetime).await?;
+        jobs::tunnel_reset::reset_tunnels(run_id, start_datetime).await?;
         return Ok(true);
     } else {
         let func: &str = "on_boot";
@@ -76,7 +61,6 @@ pub async fn on_boot(
                     %note
                 );
 
-                println!("{:?}", job_configs);
                 let job_status = jobs::run_job::determine_manufacturer(run_id, job_configs).await;
                 match job_status {
                     Ok(_) => {

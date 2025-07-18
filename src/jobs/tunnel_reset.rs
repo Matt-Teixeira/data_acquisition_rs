@@ -4,23 +4,33 @@ use crate::util::{
     get_tunnels_by_id::get_tunnels_by_id, redis::get_ip_queue, system_structs::TunnelData,
     tunnel_api::reset_tun,
 };
+use serde_json::json;
 use std::collections::HashSet;
 use std::net::IpAddr;
 use tokio::time::{sleep, Duration};
+use tracing::{error, info};
 
 pub async fn reset_tunnels(
     run_id: &str,
     start_datetime: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    let func: &str = "reset_tunnels";
+    info!(run_id, func, tag = "CALL");
+
     let systems: Vec<Systems> = get_ip_queue().await?;
 
-    println!("\n** NOt UNIQUE SYSTEMS\n{:?}", systems);
-
+    // REMOVE DUPLICATE SME/SYSTEM
     let unique_systems = dedupe_sme(systems);
 
-    println!("\n** UNIQUE SYSTEMS\n{:?}", unique_systems);
-
-    // REMOVE DUPLICATE SME
+    let note = json!({
+        "systems": &unique_systems
+    });
+    info!(
+        run_id,
+        func,
+        tag = "DETAILS",
+        %note
+    );
 
     // PLACE IP ADDRESSES INTO A VEC
     let mut ip_list: Vec<&IpAddr> = Vec::new();
@@ -30,15 +40,24 @@ pub async fn reset_tunnels(
         }
     }
 
+    // REMOVE DUPLICATE TUNNELS
     let unique_tunnels: Vec<TunnelData> = get_tunnels_by_id(run_id, ip_list).await?;
 
-    println!("\nunique_tunnels: \n{:?}", unique_tunnels);
+    let note = json!({
+        "tunnels": &unique_tunnels
+    });
+    info!(
+        run_id,
+        func,
+        tag = "DETAILS",
+        %note
+    );
 
     reset_tun(run_id, unique_tunnels).await?;
 
-    println!("STARTING 5 SECOND SLEEP");
+    println!("STARTING 8 SECOND SLEEP");
     sleep(Duration::from_secs(8)).await;
-    println!("ENDING 5 SECOND SLEEP");
+    println!("ENDING 8 SECOND SLEEP");
 
     let mut ge_ct_systems: Vec<Systems> = Vec::new();
     let mut ge_cv_systems: Vec<Systems> = Vec::new();
@@ -65,11 +84,9 @@ pub async fn reset_tunnels(
     }
 
     if ge_ct_systems.len() > 0 {
-        println!("\nGE CT RUN JOB:\n{:?}\n", ge_ct_systems);
         CT::get_ge_ct_files::get_ge_ct(run_id, ge_ct_systems, &start_datetime).await?;
     }
     if ge_cv_systems.len() > 0 {
-        println!("\nGE CV/IR RUN JOB:\n{:?}\n", ge_cv_systems);
         CV::get_ge_cv_files::get_ge_cv(run_id, ge_cv_systems, &start_datetime).await?;
     }
 

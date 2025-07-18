@@ -3,7 +3,9 @@ use base64::{engine::general_purpose, Engine as _};
 use dotenv::dotenv;
 use reqwest::{Client, StatusCode};
 use serde::Serialize;
+use serde_json::json;
 use std::env;
+use tracing::{error, info, warn};
 
 #[derive(Serialize)]
 struct BounceBody {
@@ -11,9 +13,12 @@ struct BounceBody {
 }
 
 pub async fn reset_tun(
-    run_log: &str,
+    run_id: &str,
     tunnels: Vec<TunnelData>,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    let func: &str = "reset_tun";
+    info!(run_id, func, tag = "CALL");
+
     dotenv().ok();
 
     let client = Client::builder()
@@ -23,7 +28,6 @@ pub async fn reset_tun(
     let vns3_ip = env::var("VNS3_IP").expect("Missing VNS3_IP");
     let vns3_pw = env::var("VNS3_PW").expect("Missing VNS3_PW");
 
-    println!("\nRESETTING TUNNELS");
     for tunnel in tunnels {
         if let (Some(endpoint_id), Some(tunnel_id)) = (tunnel.endpoint_id, tunnel.tunnel_id) {
             let url = format!(
@@ -47,23 +51,40 @@ pub async fn reset_tun(
             match res {
                 Ok(resp) => {
                     if resp.status() == StatusCode::OK {
-                        println!(
-                            "[SUCCESS] Tunnel {}-{} reset successful.",
-                            endpoint_id, tunnel_id
+                        let note = json!({
+                            "tunnel": &tunnel,
+                            "res_status": "[SUCCESS] Tunnel reset successful"
+                        });
+                        info!(
+                            run_id,
+                            func,
+                            tag = "DETAILS",
+                            %note
                         );
                     } else {
-                        eprintln!(
-                            "[FAIL] Tunnel {}-{} failed with status: {}",
-                            endpoint_id,
-                            tunnel_id,
-                            resp.status()
+                        let note = json!({
+                            "tunnel": &tunnel,
+                            "res_status": "[UNSUCCESSFUL] Tunnel reset unsuccessful"
+                        });
+                        warn!(
+                            run_id,
+                            func,
+                            tag = "DETAILS",
+                            %note
                         );
                     }
                 }
                 Err(e) => {
-                    eprintln!(
-                        "[ERROR] Failed to reset tunnel {}-{}: {}",
-                        endpoint_id, tunnel_id, e
+                    let note = json!({
+                        "tunnel": &tunnel,
+                        "res_status": "[UNSUCCESSFUL] Tunnel reset unsuccessful"
+                    });
+                    error!(
+                        run_id,
+                        func,
+                        tag = "DETAILS",
+                        error = ?e,
+                        %note
                     );
                     return Err(Box::new(e));
                 }
