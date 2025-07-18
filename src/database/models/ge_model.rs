@@ -1,7 +1,5 @@
-use crate::{
-    database::models::systems_model::Systems,
-    util::decrypt::{self, decrypt},
-};
+use crate::util::traits::{HasHostIp, HasSME};
+use crate::{database::models::systems_model::Systems, util::decrypt::decrypt};
 use deadpool_postgres::Pool;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -114,5 +112,17 @@ impl GeSystems {
         let password = decrypt(pass_enc)?;
 
         Ok((user, password))
+    }
+}
+
+impl HasHostIp for GeSystems {
+    fn host_ip(&self) -> Option<&IpAddr> {
+        self.host_ip.as_ref()
+    }
+}
+
+impl HasSME for GeSystems {
+    fn get_sme(&self) -> Option<&String> {
+        self.id.as_ref()
     }
 }

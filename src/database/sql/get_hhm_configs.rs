@@ -1,7 +1,5 @@
 use crate::database::models::{systems_model::Systems, ge_model::GeSystems, philips_model::PhilipsSystems};
 use deadpool_postgres::Pool;
-use serde::Serialize;
-use serde_json::json;
 use tracing::info;
 //use tracing::instrument;
 

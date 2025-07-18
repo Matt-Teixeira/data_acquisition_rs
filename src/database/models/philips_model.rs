@@ -1,4 +1,5 @@
 use crate::database::models::systems_model::Systems;
+use crate::util::traits::{HasHostIp, HasSME};
 use deadpool_postgres::Pool;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -66,5 +67,17 @@ impl PhilipsSystems {
             .collect();
 
         Ok(systems)
+    }
+}
+
+impl HasHostIp for PhilipsSystems {
+    fn host_ip(&self) -> Option<&std::net::IpAddr> {
+        self.host_ip.as_ref()
+    }
+}
+
+impl HasSME for PhilipsSystems {
+    fn get_sme(&self) -> Option<&String> {
+        self.id.as_ref()
     }
 }

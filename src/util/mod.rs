@@ -4,3 +4,6 @@ pub mod log_formatter;
 pub mod redis;
 pub mod system_structs;
 pub mod stderr_regex;
+pub mod get_tunnels_by_id;
+pub mod traits;
+pub mod tunnel_api;

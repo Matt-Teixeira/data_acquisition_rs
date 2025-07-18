@@ -56,6 +56,7 @@ pub async fn get_ip_queue() -> Result<Vec<Systems>, Box<dyn std::error::Error>> 
     // DESERIALIZE EACH ITEM BACK INTO THE System ENUM
     let mut systems: Vec<Systems> = Vec::new();
     for item in items {
+        println!("\nSYSTEM IN IP:QUEUE: {:?}", item);
         let system: Systems = serde_json::from_str(&item)?;
         systems.push(system);
     }

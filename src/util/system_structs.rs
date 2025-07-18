@@ -1,5 +1,7 @@
 use crate::database::models::systems_model::Systems;
 use serde::{Deserialize, Serialize};
+use std::net::IpAddr;
+use tokio_postgres::Row;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum System {
@@ -37,7 +39,40 @@ impl SYSTEM_ONLINE {
     }
 }
 
-/* 
+#[derive(Debug)]
+pub struct TunnelData {
+    pub remote_subnet_ip: Option<IpAddr>,
+    pub remote_subnet_mask: Option<i32>,
+    pub endpoint_id: Option<i32>,
+    pub tunnel_id: Option<i32>,
+}
+
+impl TunnelData {
+    pub fn from_row(row: Row) -> Self {
+        Self {
+            remote_subnet_ip: row.get("remote_subnet_ip"),
+            remote_subnet_mask: row.get("remote_subnet_mask"),
+            endpoint_id: row.get("endpoint_id"),
+            tunnel_id: row.get("tunnel_id"),
+        }
+    }
+
+    pub fn new(
+        remote_subnet_ip: Option<IpAddr>,
+        remote_subnet_mask: Option<i32>,
+        endpoint_id: Option<i32>,
+        tunnel_id: Option<i32>,
+    ) -> Self {
+        Self {
+            remote_subnet_ip,
+            remote_subnet_mask,
+            endpoint_id,
+            tunnel_id,
+        }
+    }
+}
+
+/*
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SYSTEM_RESET {
     pub id: String,
