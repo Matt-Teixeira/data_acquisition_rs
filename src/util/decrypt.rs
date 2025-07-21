@@ -1,8 +1,7 @@
 use aes::Aes256;
 use block_modes::block_padding::Pkcs7;
 use block_modes::{BlockMode, Cbc};
-use hex::{decode as hex_decode, encode as hex_encode};
-use rand::{rngs::OsRng, RngCore};
+use hex::decode as hex_decode;
 use std::env;
 
 type Aes256Cbc = Cbc<Aes256, Pkcs7>;

@@ -1,14 +1,16 @@
 use crate::database::models::systems_model::Systems;
 use crate::jobs::GE::{CT, CV};
 use crate::util::{
-    get_tunnels_by_id::get_tunnels_by_id, redis::get_ip_queue, system_structs::TunnelData,
+    get_tunnels_by_id::get_tunnels_by_id,
+    redis::{delete_queue, get_ip_queue},
+    system_structs::TunnelData,
     tunnel_api::reset_tun,
 };
 use serde_json::json;
 use std::collections::HashSet;
 use std::net::IpAddr;
 use tokio::time::{sleep, Duration};
-use tracing::{error, info};
+use tracing::info;
 
 pub async fn reset_tunnels(
     run_id: &str,
@@ -18,6 +20,9 @@ pub async fn reset_tunnels(
     info!(run_id, func, tag = "CALL");
 
     let systems: Vec<Systems> = get_ip_queue().await?;
+
+    // DELETE QUEUE
+    delete_queue("rust-ip:queue").await?;
 
     // REMOVE DUPLICATE SME/SYSTEM
     let unique_systems = dedupe_sme(systems);

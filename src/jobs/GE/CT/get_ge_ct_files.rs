@@ -128,14 +128,14 @@ async fn job(
     }
     // SUCCESSFULL CONNECTION ATTEMPT
     else {
-        // SET ERROR TO null via None ENUM
+        // SET ERROR TO null with None variant
         let connection_error = None;
 
         // USE STRUCT TO CREATE VALUE TO BE INSERTED INTIO REDIS rust-online:queue
         let system_to_queue = SYSTEM_ONLINE::new(
             system_id.to_string(),
             String::from(start_datetime),
-            false,
+            true,
             String::from("hhm"),
             false,
             connection_error,

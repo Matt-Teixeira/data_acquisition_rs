@@ -2,10 +2,8 @@ use crate::database::models::systems_model::Systems;
 use crate::util::traits::{HasHostIp, HasSME};
 use deadpool_postgres::Pool;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use std::net::IpAddr;
 use tokio_postgres::Row;
-use tracing::info;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PhilipsSystems {

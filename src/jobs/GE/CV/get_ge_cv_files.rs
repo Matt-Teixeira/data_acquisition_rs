@@ -131,9 +131,9 @@ async fn job(
         let system_to_queue = SYSTEM_ONLINE::new(
             system_id.to_string(),
             String::from(start_datetime),
-            false,
-            String::from("hhm"),
             true,
+            String::from("hhm"),
+            false,
             connection_error,
         );
 

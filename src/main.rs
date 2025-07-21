@@ -5,12 +5,14 @@ mod util;
 use dotenv::dotenv;
 use serde_json::json;
 use std::env;
+use std::time::Instant;
 use tracing::{error, info, warn};
 use tracing_appender::non_blocking;
 use tracing_subscriber;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let start = Instant::now();
     dotenv().ok();
 
     let boot_args: Vec<String> = env::args().collect();
@@ -87,6 +89,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let _formated_log = util::log_formatter::format_log(log_name, log_path).await?;
+
+    let duration = start.elapsed();
+    println!("\n*** Execution time: {:?} ***\n", duration);
 
     return Ok(());
 }

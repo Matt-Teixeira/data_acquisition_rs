@@ -45,6 +45,9 @@ pub async fn on_boot(
     if boot_args[1] == "ip_reset" {
         jobs::tunnel_reset::reset_tunnels(run_id, start_datetime).await?;
         return Ok(true);
+    } else if boot_args[1] == "update_conn_table" {
+        let status = jobs::update_conn_table::update_conn_hhm(run_id).await?;
+        return Ok(status);
     } else {
         let func: &str = "on_boot";
         let app = AppRunState::new(run_id, boot_args, start_datetime).await;

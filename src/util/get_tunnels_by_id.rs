@@ -1,9 +1,8 @@
 use crate::database;
 use crate::util::system_structs::TunnelData;
-use serde_json::json;
 use std::collections::HashSet;
 use std::net::IpAddr;
-use tracing::{error, info};
+use tracing::info;
 
 pub async fn get_tunnels_by_id(
     run_id: &str,
