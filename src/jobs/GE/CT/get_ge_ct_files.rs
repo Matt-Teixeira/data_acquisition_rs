@@ -56,7 +56,7 @@ async fn job(
         .as_ref()
         .ok_or("no bash script")?;
     let script_path = format!(
-        "/home/matt-teixeira/education/rust/rust-azure/src/read/GE/CT/{}",
+        "/home/matt-teixeira/hep3/data_acquisition_rs/src/read/GE/CT/{}",
         bash_script
     );
 
@@ -67,7 +67,7 @@ async fn job(
     let user_name = &ge_system.user; // $2
     let pass = &ge_system.password; // $3
     let debian_path = format!(
-        "/home/matt-teixeira/education/rust/rust-azure/files/{}",
+        "/home/matt-teixeira/hep3/data_acquisition_rs/files/{}",
         &system_id
     ); // $4
 

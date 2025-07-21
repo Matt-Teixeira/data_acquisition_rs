@@ -3,7 +3,7 @@ use std::process::Stdio;
 use tokio::process::Command;
 
 pub async fn format_log(log_name: String, log_path: String) -> Result<(), Box<dyn std::error::Error>>  {
-    let script_path = "/home/matt-teixeira/education/rust/rust-azure/src/read/tools/format_log.sh";
+    let script_path = "/home/matt-teixeira/hep3/data_acquisition_rs/src/read/tools/format_log.sh";
     let dir_name = Local::now().format("%Y-%m-%d").to_string();
     let args: Vec<&String> = vec![&log_path, &log_name, &dir_name];
 

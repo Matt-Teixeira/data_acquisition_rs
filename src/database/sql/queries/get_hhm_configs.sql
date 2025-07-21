@@ -20,7 +20,7 @@ WHERE
     sys.manufacturer = $1
     AND sys.modality LIKE $2
     AND sys.process_log = true
-    AND sys.id IN ('SME00865');
+    AND sys.id IN ('SME17378');
 
     -- GE_CT ('SME17378', 'SME17368', 'SME17377' - conn timed out);
     -- GE CV ('SME02412', 'SME00865', 'SME16399');
