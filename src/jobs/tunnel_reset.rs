@@ -1,5 +1,5 @@
 use crate::database::models::systems_model::Systems;
-use crate::jobs::GE::{CT, CV};
+use crate::jobs::GE::{CT, CV, MRI};
 use crate::util::{
     get_tunnels_by_id::get_tunnels_by_id,
     redis::{delete_queue, get_ip_queue},
@@ -66,6 +66,7 @@ pub async fn reset_tunnels(
 
     let mut ge_ct_systems: Vec<Systems> = Vec::new();
     let mut ge_cv_systems: Vec<Systems> = Vec::new();
+    let mut ge_mri_systems: Vec<Systems> = Vec::new();
     let mut philips_ct_systems: Vec<Systems> = Vec::new();
     let mut philips_cv_systems: Vec<Systems> = Vec::new();
 
@@ -76,6 +77,8 @@ pub async fn reset_tunnels(
                     ge_ct_systems.push(system);
                 } else if sys.modality.as_deref() == Some("CV/IR") {
                     ge_cv_systems.push(system);
+                } else {
+                    ge_mri_systems.push(system);
                 }
             }
             Systems::Philips(ref sys) => {
@@ -93,6 +96,9 @@ pub async fn reset_tunnels(
     }
     if ge_cv_systems.len() > 0 {
         CV::get_ge_cv_files::get_ge_cv(run_id, ge_cv_systems, &start_datetime).await?;
+    }
+    if ge_mri_systems.len() > 0 {
+        MRI::get_ge_mri_files::get_ge_mri(run_id, ge_mri_systems, &start_datetime).await?;
     }
 
     return Ok(());

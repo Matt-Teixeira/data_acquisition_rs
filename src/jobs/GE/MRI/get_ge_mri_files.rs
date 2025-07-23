@@ -10,12 +10,12 @@ use tokio::process::Command;
 use tracing::{error, info};
 use uuid::Uuid;
 
-pub async fn get_ge_ct(
+pub async fn get_ge_mri(
     run_id: &str,
     sys_configs: Vec<Systems>,
     start_datetime: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let func = "get_ge_ct";
+    let func = "get_ge_mri";
     info!(run_id = run_id, func, tag = "CALL");
 
     let jobs: Vec<_> = sys_configs
@@ -52,13 +52,15 @@ async fn job(
     let job_id: String = Uuid::new_v4().to_string();
     let func = "job";
 
+    println!("\nSYSTEM: \n{:?}", ge_system);
+
     // CREATE PATH TO POINT TO ACQUISITION SCRIPT .sh
     let bash_script = ge_system
         .acquisition_script
         .as_ref()
         .ok_or("no bash script")?;
     let script_path = format!(
-        "/home/matt-teixeira/hep3/data_acquisition_rs/src/read/GE/CT/{}",
+        "/home/matt-teixeira/hep3/data_acquisition_rs/src/read/GE/MRI/{}",
         bash_script
     );
 
@@ -83,6 +85,8 @@ async fn job(
     // CREATE ARGS LIST
     let args: Vec<&String> = vec![&host_ip, &user_name, &pass, &debian_path];
 
+    println!("\n{:?}\n", args);
+
     // PASS ARGS AND EXECUTE ACQUISITION SCRIPT
     let output = Command::new(script_path)
         .args(&args)
@@ -94,8 +98,7 @@ async fn job(
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
 
-    // CHECK STDOUT/STDERR AND DO WORK IF CONNECTION ERRORS
-
+    // START: CHECK STDOUT/STDERR AND DO WORK IF CONNECTION ERRORS
     // UNSUCCESSFULL CONNECTION ATTEMPT
     if !output.status.success() {
         // RESET THIS SYSTEM'S TUNNEL - PUSH TO ip:queue
@@ -116,9 +119,6 @@ async fn job(
 
             redis::rpush_redis_queue(System::Online(system_to_queue)).await?;
         }
-
-        eprintln!("\nScript failed: {}", stderr);
-
         let note = json!({
             "system_id": &system_id,
             "host_ip": &host_ip,
@@ -130,7 +130,7 @@ async fn job(
     }
     // SUCCESSFULL CONNECTION ATTEMPT
     else {
-        // SET ERROR TO null with None variant
+        // SET ERROR TO null via None ENUM
         let connection_error = None;
 
         // USE STRUCT TO CREATE VALUE TO BE INSERTED INTIO REDIS rust-online:queue
@@ -170,26 +170,4 @@ Some(async move {
 
 1) async { ... } creates a future.
 2) move tells Rust: move all captured variables into the future's scope.
-
-
-
-
-
-let reset_host_tunnel = system_structs::SYSTEM_RESET::new(
-                ge_system.id.as_ref().ok_or("no system id")?,
-                ge_system.manufacturer.as_ref().ok_or("no system id")?,
-                ge_system.modality.as_ref().ok_or("no system id")?,
-                ge_system.host_ip.as_ref().ok_or("no system id")?,
-                ge_system
-                    .debian_server_path
-                    .as_ref()
-                    .ok_or("no system id")?,
-                ge_system.credentials_group.as_ref().ok_or("no system id")?,
-                ge_system
-                    .acquisition_script
-                    .as_ref()
-                    .ok_or("no system id")?,
-                ge_system.data_source.as_ref().ok_or("no system id")?,
-                ge_system.tunnel_reset.as_ref().ok_or("no system id")?,
-            );
 */

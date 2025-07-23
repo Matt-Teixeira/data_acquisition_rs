@@ -34,8 +34,10 @@ pub async fn get_ge_cv(
     // Handle results
     for result in results {
         match result {
-            Ok(_) => println!("Job completed successfully"),
-            Err(e) => eprintln!("Job failed: {}", e),
+            Ok(_) => continue,
+            Err(e) => {
+                error!(run_id, func, tag = "ERROR", error = ?e);
+            }
         }
     }
 

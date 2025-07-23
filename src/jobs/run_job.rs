@@ -1,6 +1,6 @@
 use crate::{boot::on_boot::AppRunState, jobs::GE};
 use serde_json::json;
-use tracing::info;
+use tracing::{error, info};
 
 pub async fn determine_manufacturer(
     run_id: &str,
@@ -18,7 +18,17 @@ pub async fn determine_manufacturer(
     );
 
     if job_configs.config.system_manufacturer == "GE" {
-        GE::ge_modalities::determine_ge_modality(run_id, job_configs).await?;
+        let res = GE::ge_modalities::determine_ge_modality(run_id, job_configs).await;
+
+        match res {
+            Ok(_) => {
+                println!("DONE!");
+            }
+            Err(e) => {
+                println!("Error: \n{:?}", e);
+                error!(run_id, func = "determine_manufacturer", tag = "ERROR", error = ?e);
+            }
+        }
     }
 
     Ok(())

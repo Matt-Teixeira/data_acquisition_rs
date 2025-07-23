@@ -1,5 +1,8 @@
 use crate::database::db::create_pool;
-use crate::util::{redis::get_online_queue, system_structs::System};
+use crate::util::{
+    redis::{delete_queue, get_online_queue},
+    system_structs::System,
+};
 use chrono::{DateTime, FixedOffset};
 
 pub async fn update_conn_hhm(run_id: &str) -> Result<bool, Box<dyn std::error::Error>> {
@@ -11,7 +14,6 @@ pub async fn update_conn_hhm(run_id: &str) -> Result<bool, Box<dyn std::error::E
     for system in systems {
         if let System::Online(sys) = system {
             let parsed_dt: DateTime<FixedOffset> = sys.capture_datetime.parse()?;
-            // let utc_dt = parsed_dt.with_timezone(&Utc);
 
             client
                 .execute(
@@ -42,5 +44,7 @@ pub async fn update_conn_hhm(run_id: &str) -> Result<bool, Box<dyn std::error::E
                 .await?;
         }
     }
+
+    delete_queue("rust-online:queue").await?;
     Ok(true)
 }

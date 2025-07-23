@@ -1,6 +1,6 @@
 use crate::{
     boot::on_boot::AppRunState,
-    jobs::GE::{CT, CV},
+    jobs::GE::{CT, CV, MRI},
 };
 use serde_json::json;
 use tracing::info;
@@ -29,6 +29,13 @@ pub async fn determine_ge_modality(
         .await?;
     } else if job_configs.config.system_modality == "CV/IR" {
         CV::get_ge_cv_files::get_ge_cv(
+            run_id,
+            job_configs.systems,
+            &job_configs.config.start_datetime,
+        )
+        .await?;
+    } else {
+        MRI::get_ge_mri_files::get_ge_mri(
             run_id,
             job_configs.systems,
             &job_configs.config.start_datetime,

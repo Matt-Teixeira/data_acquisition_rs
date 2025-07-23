@@ -19,8 +19,9 @@ FROM
 WHERE
     sys.manufacturer = $1
     AND sys.modality LIKE $2
-    AND sys.process_log = true
-    AND sys.id IN ('SME02412', 'SME00865');
+    AND sys.process_log = true;
 
     -- GE_CT ('SME17378', 'SME17368', 'SME17377');
     -- GE CV ('SME02412', 'SME00865');
+   -- GE MRI ('SME02582', 'SME02583', 'SME19647', 'SME17380'); offline ('SME17382')
+   --
